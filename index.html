@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yuk Belajar Baca! - Media Interaktif PAUD/TK</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        * {
+            font-family: 'Fredoka', 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* 3D Soft Kids Button Effect */
+        .btn-kids {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 0 var(--btn-shadow-color, #cbd5e1);
+        }
+
+        .btn-kids:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--btn-shadow-color, #cbd5e1);
+        }
+
+        /* Card Hover Bounce */
+        .card-bounce {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card-bounce:active {
+            transform: scale(0.92);
+        }
+
+        /* Pop Animation for Large Display Showcase */
+        @keyframes pop-large-display {
+            0% { transform: scale(0.6) rotate(-4deg); opacity: 0.5; }
+            50% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .animate-pop-display {
+            animation: pop-large-display 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Pulse Animation for Audio Speaker */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .animate-pulse-ring {
+            animation: pulse-ring 1.8s infinite ease-in-out;
+        }
+
+        /* Sequential KV Merge Animations */
+        @keyframes merge-left {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(40px) scale(1.1); }
+            100% { transform: translateX(20px) scale(1); }
+        }
+
+        @keyframes merge-right {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-40px) scale(1.1); }
+            100% { transform: translateX(-20px) scale(1); }
+        }
+
+        @keyframes pop-merge {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-merge-left { animation: merge-left 0.6s forwards ease-in-out; }
+        .animate-merge-right { animation: merge-right 0.6s forwards ease-in-out; }
+        .animate-pop-merge { animation: pop-merge 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* Wiggle error animation */
+        @keyframes error-wiggle {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px) rotate(-3deg); }
+            40%, 80% { transform: translateX(10px) rotate(3deg); }
+        }
+
+        .animate-wiggle {
+            animation: error-wiggle 0.4s ease-in-out;
+        }
+
+        /* Canvas Overlay for Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Custom Scrollbar for Consonant Selector */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800 pb-20 md:pb-6 overflow-x-hidden">
+
+    <!-- Confetti Fireworks Overlay -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Header & Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-4 border-amber-300 px-4 py-3 shadow-md">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            
+            <!-- App Title & Mascot Badge -->
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-white text-2xl font-bold shadow-md transform -rotate-6">
+                    🔤
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black text-amber-600 tracking-wide leading-tight">
+                        Yuk Baca!
+                    </h1>
+                    <p class="text-xs font-semibold text-slate-500 hidden sm:block">Belajar Membaca Dasar Interaktif</p>
+                </div>
+            </div>
+
+            <!-- Gamification Star Counter & Speech Status -->
+            <div class="flex items-center space-x-2">
+                <!-- Star Counter -->
+                <div class="flex items-center bg-amber-50 border-2 border-amber-300 rounded-full px-3 py-1 shadow-sm">
+                    <span class="text-xl mr-1 animate-bounce">⭐</span>
+                    <span id="star-count" class="text-lg font-black text-amber-600">0</span>
+                </div>
+
+                <!-- Sound Test / Voice Selector Button -->
+                <button onclick="app.testSpeech()" title="Uji Suara" class="p-2 rounded-full bg-sky-100 border-2 border-sky-300 text-sky-600 hover:bg-sky-200 transition-colors">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl w-full mx-auto p-4 flex-1">
+        
+        <!-- SECTION 1: MODUL ALFABET -->
+        <section id="module-alphabet" class="space-y-6">
+            <!-- Header Module 1 -->
+            <div class="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 p-4 rounded-3xl text-white shadow-lg text-center relative overflow-hidden">
+                <h2 class="text-2xl font-black mb-1">Modul 1: Pengenalan Alfabet</h2>
+                <p class="text-sm font-medium text-pink-100">Sentuh huruf di bawah untuk mendengarkan dan melihatnya dengan jelas!</p>
+            </div>
+
+            <!-- KOTAK BESAR DISPLAY HURUF TERPILIH (FITUR BARU) -->
+            <div class="bg-gradient-to-b from-white to-purple-50 border-4 border-purple-300 rounded-3xl p-5 shadow-lg text-center flex flex-col items-center justify-center relative min-h-[210px] transform transition-all">
+                <div class="absolute top-3 left-4 bg-purple-100 border border-purple-300 text-purple-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Huruf Terpilih
+                </div>
+                
+                <!-- Display Huruf Ukuran Ekstra Besar -->
+                <div id="alphabet-large-display" class="text-7xl sm:text-8xl md:text-9xl font-black text-purple-600 my-2 drop-shadow-md select-none transition-all">
+                    A
+                </div>
+
+                <!-- Sub-Label / Bunyi eja -->
+                <div id="alphabet-large-phonetic" class="text-sm sm:text-base font-bold text-slate-500 mb-2">
+                    Dibaca: "A"
+                </div>
+
+                <!-- Tombol Putar Ulang Suara -->
+                <button onclick="app.playCurrentAlphabetAudio()" class="btn-kids bg-purple-500 hover:bg-purple-600 text-white font-bold text-sm px-5 py-2 rounded-2xl shadow-md border-2 border-purple-300 flex items-center gap-2" style="--btn-shadow-color: #7e22ce;">
+                    <span class="text-lg">🔊</span>
+                    <span>Dengar Suara Huruf</span>
+                </button>
+            </div>
+
+            <!-- View Mode Switcher -->
+            <div class="flex justify-center gap-2 bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-200 max-w-md mx-auto">
+                <button onclick="app.setAlphabetMode('upper')" id="btn-mode-upper" class="flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all bg-white text-purple-600 shadow-sm border border-slate-200">
+                    Huruf Besar (A)
+                </button>
+                <button onclick="app.setAlphabetMode('lower')" id="btn-mode-lower" class="flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:text-slate-900">
+                    Huruf Kecil (a)
+                </button>
+                <button onclick="app.setAlphabetMode('both')" id="btn-mode-both" class="flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:text-slate-900">
+                    Besar & Kecil (Aa)
+                </button>
+            </div>
+
+            <!-- Alphabet Grid Display -->
+            <div id="alphabet-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-3">
+                <!-- Letters generated dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: MODUL MENAUTKAN KONSONAN & VOKAL (K-V) -->
+        <section id="module-kv" class="space-y-6 hidden">
+            <!-- Header Module 2 -->
+            <div class="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 p-4 rounded-3xl text-white shadow-lg text-center">
+                <h2 class="text-2xl font-black mb-1">Modul 2: Menautkan Konsonan & Vokal</h2>
+                <p class="text-sm font-medium text-emerald-100">Gabungkan huruf untuk membentuk suku kata!</p>
+            </div>
+
+            <!-- Interactive Merging Arena -->
+            <div class="bg-white border-4 border-teal-200 rounded-3xl p-6 shadow-md text-center space-y-6 relative">
+                
+                <!-- Stage Display Bubbles -->
+                <div class="flex items-center justify-center gap-3 sm:gap-6 min-h-[120px]">
+                    
+                    <!-- Consonant Bubble -->
+                    <div id="bubble-consonant" class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-pink-100 border-4 border-pink-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-pink-600 shadow-md card-bounce cursor-pointer">
+                        b
+                    </div>
+
+                    <!-- Plus Symbol -->
+                    <div class="text-3xl font-black text-teal-400 animate-pulse">+</div>
+
+                    <!-- Vowel Bubble -->
+                    <div id="bubble-vowel" class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-sky-100 border-4 border-sky-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-sky-600 shadow-md card-bounce cursor-pointer">
+                        a
+                    </div>
+
+                    <!-- Equals Symbol -->
+                    <div class="text-3xl font-black text-teal-400">=</div>
+
+                    <!-- Result Merged Syllable Bubble -->
+                    <div id="bubble-result" class="w-24 h-20 sm:w-32 sm:h-24 rounded-3xl bg-amber-100 border-4 border-amber-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-amber-600 shadow-lg relative overflow-hidden">
+                        <span id="text-result">ba</span>
+                    </div>
+                </div>
+
+                <!-- Action Button: TAUTKAN -->
+                <div class="flex justify-center">
+                    <button onclick="app.animateAndPlayKV()" id="btn-tautkan" class="btn-kids bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xl py-3 px-8 rounded-2xl shadow-lg border-2 border-amber-200 flex items-center gap-2 transform active:scale-95" style="--btn-shadow-color: #d97706;">
+                        <span>✨ TAUTKAN HURUF ✨</span>
+                    </button>
+                </div>
+
+                <!-- Selection Sliders / Grids -->
+                <div class="space-y-4 pt-4 border-t-2 border-dashed border-teal-100">
+                    <!-- Consonant Picker -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Huruf Konsonan:</label>
+                        <div id="consonant-selector" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar px-1">
+                            <!-- Consonants dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Vowel Picker -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Huruf Vokal:</label>
+                        <div id="vowel-selector" class="flex justify-center gap-2 px-1">
+                            <!-- Vowels dynamically loaded -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syllable Family Row ("Keluarga Suku Kata") -->
+            <div class="bg-amber-50 border-3 border-amber-200 rounded-3xl p-5 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-black text-amber-800 text-lg flex items-center gap-2">
+                        <span>👨‍‍👩‍👧‍👦</span> Keluarga Suku Kata: <span id="family-consonant-label" class="text-amber-600 underline">b</span>
+                    </h3>
+                    <span class="text-xs text-amber-600 font-semibold">Klik untuk membaca!</span>
+                </div>
+                <div id="syllable-family-container" class="grid grid-cols-5 gap-2 sm:gap-3">
+                    <!-- Family cards dynamically rendered -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: FITUR ANTI-BOSAN & GAMIFIKASI (KUIS TEBAK SUARA) -->
+        <section id="module-quiz" class="space-y-6 hidden">
+            <!-- Header Module 3 -->
+            <div class="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 p-4 rounded-3xl text-white shadow-lg text-center">
+                <h2 class="text-2xl font-black mb-1">Modul 3: Kuis Tebak Suara 🎯</h2>
+                <p class="text-sm font-medium text-amber-100">Dengarkan suaranya, lalu pilih kartu yang tepat!</p>
+            </div>
+
+            <!-- Quiz Play Area -->
+            <div class="bg-white border-4 border-amber-200 rounded-3xl p-6 shadow-md text-center space-y-6">
+                
+                <!-- Quiz Level Toggle -->
+                <div class="flex justify-center gap-2 bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-200 max-w-sm mx-auto">
+                    <button onclick="app.setQuizMode('letters')" id="btn-quiz-mode-letters" class="flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-white text-amber-600 shadow-sm border border-slate-200">
+                        Tebak Huruf
+                    </button>
+                    <button onclick="app.setQuizMode('syllables')" id="btn-quiz-mode-syllables" class="flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900">
+                        Tebak Suku Kata
+                    </button>
+                </div>
+
+                <!-- Audio Question Trigger Card -->
+                <div class="flex flex-col items-center justify-center space-y-3 py-2">
+                    <button onclick="app.playQuizQuestionAudio()" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-white flex flex-col items-center justify-center shadow-xl border-4 border-amber-200 card-bounce hover:scale-105 transition-all group relative">
+                        <span class="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-25"></span>
+                        <span class="text-4xl sm:text-5xl mb-1 group-hover:scale-110 transition-transform">🔊</span>
+                        <span class="text-xs font-black uppercase tracking-wider text-amber-900">Dengar Suara</span>
+                    </button>
+                    <p class="text-xs font-semibold text-slate-400">Tekan tombol di atas untuk mengulang suara</p>
+                </div>
+
+                <!-- Answer Card Options Container (Strictly NO OBJECT IMAGES) -->
+                <div id="quiz-options-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-lg mx-auto">
+                    <!-- Option Cards generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Feedback Message Box (Non-alert) -->
+            <div id="quiz-feedback" class="hidden p-4 rounded-2xl text-center font-black text-lg shadow-md transition-all">
+                <!-- Dynamic feedback text -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Mobile-Friendly Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-4 border-slate-100 shadow-2xl px-2 py-2">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            
+            <!-- Tab 1: Alfabet -->
+            <button onclick="app.switchTab('alphabet')" id="nav-alphabet" class="flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-pink-600 bg-pink-50 transition-all font-bold text-xs">
+                <span class="text-2xl mb-0.5">🔤</span>
+                <span>Alfabet</span>
+            </button>
+
+            <!-- Tab 2: Tautkan KV -->
+            <button onclick="app.switchTab('kv')" id="nav-kv" class="flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-slate-400 hover:text-teal-600 transition-all font-bold text-xs">
+                <span class="text-2xl mb-0.5">🔗</span>
+                <span>Tautkan</span>
+            </button>
+
+            <!-- Tab 3: Kuis Gamifikasi -->
+            <button onclick="app.switchTab('quiz')" id="nav-quiz" class="flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-slate-400 hover:text-amber-600 transition-all font-bold text-xs">
+                <span class="text-2xl mb-0.5">🎯</span>
+                <span>Kuis Seru</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        /**
+         * Senior Early Childhood App Engine - Interactive Reading Module
+         * Standardized for PAUD/TK/SD Grade 1 Indonesian Pedagogy
+         */
+        class ReadingApp {
+            constructor() {
+                // Application State Variables
+                this.currentTab = 'alphabet'; // 'alphabet' | 'kv' | 'quiz'
+                this.alphabetDisplayMode = 'upper'; // 'upper' | 'lower' | 'both'
+                this.selectedAlphabetLetter = 'a'; // Currently displayed large letter
+                
+                // Consonant and Vowel List
+                this.consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','r','s','t','v','w','y','z'];
+                this.vowels = ['a','i','u','e','o'];
+                
+                // Active Selection for Modul 2
+                this.selectedConsonant = 'b';
+                this.selectedVowel = 'a';
+
+                // Quiz State
+                this.quizMode = 'letters'; // 'letters' | 'syllables'
+                this.targetQuizAnswer = '';
+                this.stars = 0;
+                this.isSpeechBusy = false;
+
+                // Color Palette mapping for vibrant colorful cards
+                this.cardColors = [
+                    { bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-600' },
+                    { bg: 'bg-sky-100', border: 'border-sky-400', text: 'text-sky-600' },
+                    { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-600' },
+                    { bg: 'bg-emerald-100', border: 'border-emerald-400', text: 'text-emerald-600' },
+                    { bg: 'bg-purple-100', border: 'border-purple-400', text: 'text-purple-600' },
+                    { bg: 'bg-indigo-100', border: 'border-indigo-400', text: 'text-indigo-600' },
+                    { bg: 'bg-teal-100', border: 'border-teal-400', text: 'text-teal-600' },
+                    { bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-600' }
+                ];
+
+                // Letter Pronunciation Dictionary (Metode Eja / Bunyi Huruf Indonesia)
+                this.letterPronunciations = {
+                    a: 'a', b: 'be', c: 'ce', d: 'de', e: 'e', f: 'ef', g: 'ge', h: 'ha',
+                    i: 'i', j: 'je', k: 'ka', l: 'el', m: 'em', n: 'en', o: 'o', p: 'pe',
+                    q: 'ki', r: 'er', s: 'es', t: 'te', u: 'u', v: 've', w: 'we', x: 'eks',
+                    y: 'ye', z: 'zet'
+                };
+
+                // Encouragement Praise Audio Quotes
+                this.praiseQuotes = [
+                    "Pintar!", "Hebat sekali!", "Luar biasa!", "Wah, kamu cerdas!", "Bagus sekali!"
+                ];
+
+                // Bindings
+                this.initSpeech();
+            }
+
+            /**
+             * Web Speech API Setup with id-ID fallback
+             */
+            initSpeech() {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        window.speechSynthesis.getVoices();
+                    };
+                }
+            }
+
+            /**
+             * Asynchronous Speech Synthesis Wrapper
+             */
+            speakAsync(text, rate = 0.8, pitch = 1.15) {
+                return new Promise((resolve) => {
+                    if (!('speechSynthesis' in window)) {
+                        resolve();
+                        return;
+                    }
+
+                    // Cancel ongoing speech
+                    window.speechSynthesis.cancel();
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'id-ID';
+                    utterance.rate = rate; // Slower rate for clear preschool listening
+                    utterance.pitch = pitch; // Slightly higher pitch for friendly child-like tone
+
+                    // Search for Indonesian voice
+                    const voices = window.speechSynthesis.getVoices();
+                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                    if (idVoice) {
+                        utterance.voice = idVoice;
+                    }
+
+                    utterance.onend = () => resolve();
+                    utterance.onerror = () => resolve();
+
+                    window.speechSynthesis.speak(utterance);
+                });
+            }
+
+            /**
+             * Audio Test Helper
+             */
+            testSpeech() {
+                this.speakAsync("Halo! Selamat belajar membaca ya!", 0.85, 1.2);
+            }
+
+            /**
+             * Update the Large Box Display in Module 1
+             */
+            updateAlphabetLargeDisplay(letterLower) {
+                this.selectedAlphabetLetter = letterLower;
+
+                const largeDisplay = document.getElementById('alphabet-large-display');
+                const phoneticLabel = document.getElementById('alphabet-large-phonetic');
+
+                const upper = letterLower.toUpperCase();
+                let formattedText = upper;
+
+                if (this.alphabetDisplayMode === 'lower') {
+                    formattedText = letterLower;
+                } else if (this.alphabetDisplayMode === 'both') {
+                    formattedText = `${upper} ${letterLower}`;
+                }
+
+                // Trigger pop animation
+                largeDisplay.classList.remove('animate-pop-display');
+                void largeDisplay.offsetWidth; // trigger reflow
+                largeDisplay.innerText = formattedText;
+                largeDisplay.classList.add('animate-pop-display');
+
+                const soundText = this.letterPronunciations[letterLower] || letterLower;
+                phoneticLabel.innerText = `Dibaca: "${soundText.toUpperCase()}"`;
+            }
+
+            /**
+             * Play audio of currently selected alphabet letter
+             */
+            playCurrentAlphabetAudio() {
+                const sound = this.letterPronunciations[this.selectedAlphabetLetter];
+                if (sound) {
+                    this.speakAsync(sound);
+                }
+            }
+
+            /**
+             * Render Alphabet Cards (A-Z)
+             */
+            renderAlphabetModule() {
+                const container = document.getElementById('alphabet-grid');
+                container.innerHTML = '';
+
+                // Update large display box
+                this.updateAlphabetLargeDisplay(this.selectedAlphabetLetter);
+
+                for (let i = 0; i < 26; i++) {
+                    const charCode = 97 + i; // 'a' to 'z'
+                    const letterLower = String.fromCharCode(charCode);
+                    const letterUpper = letterLower.toUpperCase();
+                    
+                    let displayChar = letterUpper;
+                    if (this.alphabetDisplayMode === 'lower') displayChar = letterLower;
+                    if (this.alphabetDisplayMode === 'both') displayChar = `${letterUpper}${letterLower}`;
+
+                    const color = this.cardColors[i % this.cardColors.length];
+
+                    const card = document.createElement('button');
+                    const isSelected = letterLower === this.selectedAlphabetLetter;
+
+                    card.className = `${color.bg} border-3 sm:border-4 ${color.border} ${color.text} rounded-2xl p-3 sm:p-4 text-center text-xl sm:text-2xl font-black shadow-sm card-bounce flex items-center justify-center min-h-[64px] transition-all hover:scale-105 active:scale-90 ${isSelected ? 'ring-4 ring-purple-500 scale-105 shadow-md' : ''}`;
+                    card.innerHTML = displayChar;
+
+                    card.onclick = () => {
+                        this.updateAlphabetLargeDisplay(letterLower);
+                        this.playCurrentAlphabetAudio();
+                        this.renderAlphabetModule(); // refresh highlight border
+                    };
+
+                    container.appendChild(card);
+                }
+            }
+
+            /**
+             * Set Alphabet Display Mode (A / a / Aa)
+             */
+            setAlphabetMode(mode) {
+                this.alphabetDisplayMode = mode;
+                
+                // Update Button Styles
+                ['upper', 'lower', 'both'].forEach(m => {
+                    const btn = document.getElementById(`btn-mode-${m}`);
+                    if (m === mode) {
+                        btn.className = 'flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all bg-white text-purple-600 shadow-sm border border-slate-200';
+                    } else {
+                        btn.className = 'flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:text-slate-900';
+                    }
+                });
+
+                this.renderAlphabetModule();
+            }
+
+            /**
+             * Render KV Selector controls
+             */
+            renderKVModule() {
+                // Render Consonant Picker
+                const cContainer = document.getElementById('consonant-selector');
+                cContainer.innerHTML = '';
+                
+                this.consonants.forEach(c => {
+                    const isSelected = c === this.selectedConsonant;
+                    const btn = document.createElement('button');
+                    btn.className = `min-w-[48px] h-12 rounded-xl font-black text-xl transition-all border-2 ${
+                        isSelected 
+                        ? 'bg-pink-500 text-white border-pink-600 shadow-md scale-105' 
+                        : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                    }`;
+                    btn.innerText = c;
+                    btn.onclick = () => {
+                        this.selectedConsonant = c;
+                        this.updateKVStage();
+                    };
+                    cContainer.appendChild(btn);
+                });
+
+                // Render Vowel Picker
+                const vContainer = document.getElementById('vowel-selector');
+                vContainer.innerHTML = '';
+
+                this.vowels.forEach(v => {
+                    const isSelected = v === this.selectedVowel;
+                    const btn = document.createElement('button');
+                    btn.className = `w-12 h-12 rounded-xl font-black text-xl transition-all border-2 ${
+                        isSelected 
+                        ? 'bg-sky-500 text-white border-sky-600 shadow-md scale-105' 
+                        : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                    }`;
+                    btn.innerText = v;
+                    btn.onclick = () => {
+                        this.selectedVowel = v;
+                        this.updateKVStage();
+                    };
+                    vContainer.appendChild(btn);
+                });
+
+                this.updateKVStage();
+            }
+
+            /**
+             * Update Stage & Syllable Family Row
+             */
+            updateKVStage() {
+                document.getElementById('bubble-consonant').innerText = this.selectedConsonant;
+                document.getElementById('bubble-vowel').innerText = this.selectedVowel;
+                
+                const syllable = this.selectedConsonant + this.selectedVowel;
+                document.getElementById('text-result').innerText = syllable;
+
+                // Update Consonant Family Label
+                document.getElementById('family-consonant-label').innerText = this.selectedConsonant;
+
+                // Render Syllable Family Buttons
+                const famContainer = document.getElementById('syllable-family-container');
+                famContainer.innerHTML = '';
+
+                this.vowels.forEach((v, idx) => {
+                    const famSyllable = this.selectedConsonant + v;
+                    const color = this.cardColors[idx % this.cardColors.length];
+
+                    const btn = document.createElement('button');
+                    btn.className = `${color.bg} border-3 ${color.border} ${color.text} font-black text-2xl py-3 rounded-2xl shadow-sm card-bounce hover:scale-105`;
+                    btn.innerText = famSyllable;
+                    btn.onclick = () => {
+                        this.speakAsync(famSyllable, 0.8, 1.2);
+                    };
+                    famContainer.appendChild(btn);
+                });
+
+                // Re-render pickers to update active highlight states
+                this.renderKVModulePickers();
+            }
+
+            /**
+             * Update Selector active button states without full re-creation
+             */
+            renderKVModulePickers() {
+                const cContainer = document.getElementById('consonant-selector');
+                Array.from(cContainer.children).forEach(btn => {
+                    if (btn.innerText === this.selectedConsonant) {
+                        btn.className = 'min-w-[48px] h-12 rounded-xl font-black text-xl transition-all border-2 bg-pink-500 text-white border-pink-600 shadow-md scale-105';
+                    } else {
+                        btn.className = 'min-w-[48px] h-12 rounded-xl font-black text-xl transition-all border-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200';
+                    }
+                });
+
+                const vContainer = document.getElementById('vowel-selector');
+                Array.from(vContainer.children).forEach(btn => {
+                    if (btn.innerText === this.selectedVowel) {
+                        btn.className = 'w-12 h-12 rounded-xl font-black text-xl transition-all border-2 bg-sky-500 text-white border-sky-600 shadow-md scale-105';
+                    } else {
+                        btn.className = 'w-12 h-12 rounded-xl font-black text-xl transition-all border-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200';
+                    }
+                });
+            }
+
+            /**
+             * Animate Merging Bubbles & Play Sequential Audio (K ... V ... KV!)
+             */
+            async animateAndPlayKV() {
+                if (this.isSpeechBusy) return;
+                this.isSpeechBusy = true;
+
+                const cBubble = document.getElementById('bubble-consonant');
+                const vBubble = document.getElementById('bubble-vowel');
+                const resBubble = document.getElementById('bubble-result');
+
+                const cSound = this.letterPronunciations[this.selectedConsonant];
+                const vSound = this.selectedVowel;
+                const syllable = this.selectedConsonant + this.selectedVowel;
+
+                // Step 1: Pronounce Consonant Sound
+                cBubble.classList.add('scale-110', 'ring-4', 'ring-pink-300');
+                await this.speakAsync(cSound, 0.75, 1.1);
+                cBubble.classList.remove('scale-110', 'ring-4', 'ring-pink-300');
+
+                await new Promise(r => setTimeout(r, 200));
+
+                // Step 2: Pronounce Vowel Sound
+                vBubble.classList.add('scale-110', 'ring-4', 'ring-sky-300');
+                await this.speakAsync(vSound, 0.75, 1.1);
+                vBubble.classList.remove('scale-110', 'ring-4', 'ring-sky-300');
+
+                await new Promise(r => setTimeout(r, 200));
+
+                // Step 3: Visual Merging Animation
+                cBubble.classList.add('animate-merge-left');
+                vBubble.classList.add('animate-merge-right');
+
+                setTimeout(() => {
+                    resBubble.classList.add('animate-pop-merge');
+                }, 300);
+
+                // Step 4: Pronounce Combined Syllable Audio
+                await this.speakAsync(syllable, 0.85, 1.25);
+
+                // Reset Animation Classes
+                setTimeout(() => {
+                    cBubble.classList.remove('animate-merge-left');
+                    vBubble.classList.remove('animate-merge-right');
+                    resBubble.classList.remove('animate-pop-merge');
+                    this.isSpeechBusy = false;
+                }, 600);
+            }
+
+            /**
+             * Setup & Render Quiz Module
+             */
+            setQuizMode(mode) {
+                this.quizMode = mode;
+
+                const btnL = document.getElementById('btn-quiz-mode-letters');
+                const btnS = document.getElementById('btn-quiz-mode-syllables');
+
+                if (mode === 'letters') {
+                    btnL.className = 'flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-white text-amber-600 shadow-sm border border-slate-200';
+                    btnS.className = 'flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900';
+                } else {
+                    btnS.className = 'flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-white text-amber-600 shadow-sm border border-slate-200';
+                    btnL.className = 'flex-1 py-1.5 px-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900';
+                }
+
+                this.generateQuizQuestion();
+            }
+
+            /**
+             * Generate Random Quiz Options
+             */
+            generateQuizQuestion() {
+                const feedbackEl = document.getElementById('quiz-feedback');
+                feedbackEl.className = 'hidden p-4 rounded-2xl text-center font-black text-lg shadow-md transition-all';
+
+                let pool = [];
+                if (this.quizMode === 'letters') {
+                    pool = Object.keys(this.letterPronunciations);
+                } else {
+                    // Generate KV Syllables pool
+                    this.consonants.forEach(c => {
+                        this.vowels.forEach(v => {
+                            pool.push(c + v);
+                        });
+                    });
+                }
+
+                // Pick Target
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                this.targetQuizAnswer = pool[randomIndex];
+
+                // Pick 3 Distractors
+                const options = [this.targetQuizAnswer];
+                while (options.length < 4) {
+                    const randomDistractor = pool[Math.floor(Math.random() * pool.length)];
+                    if (!options.includes(randomDistractor)) {
+                        options.push(randomDistractor);
+                    }
+                }
+
+                // Shuffle Options
+                options.sort(() => Math.random() - 0.5);
+
+                // Render Option Cards
+                const grid = document.getElementById('quiz-options-grid');
+                grid.innerHTML = '';
+
+                options.forEach((opt, idx) => {
+                    const color = this.cardColors[idx % this.cardColors.length];
+                    const card = document.createElement('button');
+                    card.className = `${color.bg} border-4 ${color.border} ${color.text} font-black text-3xl sm:text-4xl py-6 sm:py-8 rounded-3xl shadow-md card-bounce flex items-center justify-center transition-all hover:scale-105 active:scale-95`;
+                    card.innerText = opt;
+                    card.onclick = () => this.handleAnswerSelection(opt, card);
+                    grid.appendChild(card);
+                });
+
+                // Automatically speak target sound after brief delay
+                setTimeout(() => {
+                    this.playQuizQuestionAudio();
+                }, 300);
+            }
+
+            /**
+             * Play current Quiz Question Audio
+             */
+            playQuizQuestionAudio() {
+                if (this.quizMode === 'letters') {
+                    const soundText = this.letterPronunciations[this.targetQuizAnswer];
+                    this.speakAsync(soundText, 0.8, 1.2);
+                } else {
+                    this.speakAsync(this.targetQuizAnswer, 0.8, 1.2);
+                }
+            }
+
+            /**
+             * Handle User Answer Click
+             */
+            async handleAnswerSelection(selectedOption, cardElement) {
+                if (this.isSpeechBusy) return;
+                this.isSpeechBusy = true;
+
+                const feedbackEl = document.getElementById('quiz-feedback');
+
+                if (selectedOption === this.targetQuizAnswer) {
+                    // CORRECT ANSWER
+                    cardElement.classList.add('ring-8', 'ring-emerald-400', 'scale-105');
+                    
+                    // Increment Stars
+                    this.stars += 1;
+                    document.getElementById('star-count').innerText = this.stars;
+
+                    // Show Feedback
+                    feedbackEl.innerText = "✨ Jawabanmu Benar! Great Job! ✨";
+                    feedbackEl.className = "p-4 rounded-2xl text-center font-black text-lg shadow-md bg-emerald-100 text-emerald-700 border-2 border-emerald-300 block animate-bounce";
+
+                    // Trigger Visual Canvas Confetti
+                    triggerConfetti();
+
+                    // Praise Audio
+                    const praise = this.praiseQuotes[Math.floor(Math.random() * this.praiseQuotes.length)];
+                    await this.speakAsync(praise, 0.85, 1.25);
+
+                    this.isSpeechBusy = false;
+
+                    // Load next question after delay
+                    setTimeout(() => {
+                        this.generateQuizQuestion();
+                    }, 1200);
+
+                } else {
+                    // WRONG ANSWER
+                    cardElement.classList.add('animate-wiggle', 'ring-4', 'ring-rose-400');
+                    
+                    feedbackEl.innerText = "😊 Coba lagi ya, kamu pasti bisa!";
+                    feedbackEl.className = "p-4 rounded-2xl text-center font-black text-lg shadow-md bg-rose-100 text-rose-700 border-2 border-rose-300 block";
+
+                    await this.speakAsync("Coba lagi ya!", 0.85, 1.1);
+
+                    setTimeout(() => {
+                        cardElement.classList.remove('animate-wiggle', 'ring-4', 'ring-rose-400');
+                        this.isSpeechBusy = false;
+                    }, 600);
+                }
+            }
+
+            /**
+             * Tab Navigation Switcher
+             */
+            switchTab(tabName) {
+                this.currentTab = tabName;
+
+                // Hide all sections
+                document.getElementById('module-alphabet').classList.add('hidden');
+                document.getElementById('module-kv').classList.add('hidden');
+                document.getElementById('module-quiz').classList.add('hidden');
+
+                // Reset Tab Styles
+                const navA = document.getElementById('nav-alphabet');
+                const navKV = document.getElementById('nav-kv');
+                const navQ = document.getElementById('nav-quiz');
+
+                [navA, navKV, navQ].forEach(nav => {
+                    nav.className = "flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-slate-400 hover:text-slate-600 transition-all font-bold text-xs";
+                });
+
+                // Show active section & highlight nav button
+                if (tabName === 'alphabet') {
+                    document.getElementById('module-alphabet').classList.remove('hidden');
+                    navA.className = "flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-pink-600 bg-pink-50 transition-all font-bold text-xs";
+                    this.renderAlphabetModule();
+                } else if (tabName === 'kv') {
+                    document.getElementById('module-kv').classList.remove('hidden');
+                    navKV.className = "flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-teal-600 bg-teal-50 transition-all font-bold text-xs";
+                    this.renderKVModule();
+                } else if (tabName === 'quiz') {
+                    document.getElementById('module-quiz').classList.remove('hidden');
+                    navQ.className = "flex-1 flex flex-col items-center py-1.5 px-2 rounded-2xl text-amber-600 bg-amber-50 transition-all font-bold text-xs";
+                    this.generateQuizQuestion();
+                }
+            }
+        }
+
+        /**
+         * Pure Lightweight JS Confetti Particles
+         */
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f43f5e', '#06b6d4', '#eab308', '#10b981', '#a855f7', '#f97316'];
+
+            for (let i = 0; i < 75; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 3,
+                    size: Math.random() * 8 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+
+            let animationFrame;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.25; // gravity
+                    p.opacity -= 0.015;
+                    p.rotation += p.rotationSpeed;
+
+                    if (p.opacity > 0) {
+                        alive = true;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate((p.rotation * Math.PI) / 180);
+                        ctx.globalAlpha = Math.max(p.opacity, 0);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        ctx.restore();
+                    }
+                });
+
+                if (alive) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            render();
+        }
+
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new ReadingApp();
+            app.renderAlphabetModule();
+        });
+    </script>
+</body>
+</html>
